@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anaerobic Digestion PhET Lab</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* HEADER */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        header h1 {
+            font-size: 24px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        header .stage-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stage-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .reset-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            display: flex;
+            gap: 15px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* STAGE CONTAINER */
+        .stage {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+
+        .stage.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* STAGE 1: INTRODUCTION */
+        #stage1 {
+            gap: 15px;
+        }
+
+        .intro-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .digester-viz {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digester-tank {
+            position: relative;
+            width: 280px;
+            height: 380px;
+            background: linear-gradient(to right, #1e293b, #334155);
+            border: 4px solid #667eea;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .digester-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .digester-inlet {
+            position: absolute;
+            top: -20px;
+            left: 30px;
+            width: 40px;
+            height: 40px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 3px solid #16a34a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            animation: inlet-pulse 2s infinite;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        @keyframes inlet-pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .inlet-label {
+            position: absolute;
+            top: -50px;
+            left: 30px;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .digester-inlet:hover ~ .inlet-label,
+        .inlet-label:hover {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .waste-particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #fbbf24;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall 3s linear infinite;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(360px); opacity: 0; }
+        }
+
+        .digester-liquid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to top, #6366f1, #8b5cf6);
+            border-top: 2px solid rgba(255, 255, 255, 0.2);
+            transition: height 0.5s ease;
+            opacity: 0.7;
+        }
+
+        .microbes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+        }
+
+        .microbe {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: swim 4s infinite;
+        }
+
+        @keyframes swim {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(20px, 10px); }
+            50% { transform: translate(0, 20px); }
+            75% { transform: translate(-20px, 10px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        .gas-layer {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(to bottom, rgba(34, 197, 94, 0.3), transparent);
+            transition: height 0.5s ease;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), rgba(34, 197, 94, 0.6));
+            border-radius: 50%;
+            animation: rise 2s ease-in infinite;
+            opacity: 0.9;
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-360px) translateX(20px);
+                opacity: 0;
+            }
+        }
+
+        .digester-outlet {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background: #f59e0b;
+            border-radius: 50%;
+            border: 3px solid #d97706;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            animation: outlet-pulse 2s infinite 0.5s;
+            z-index: 10;
+        }
+
+        @keyframes outlet-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .outlet-label {
+            position: absolute;
+            bottom: 55px;
+            right: 20px;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .digester-outlet:hover ~ .outlet-label,
+        .outlet-label:hover {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .digester-info {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .info-badge {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4c51bf;
+            cursor: help;
+            transition: all 0.3s;
+        }
+
+        .info-badge:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .intro-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .intro-section {
+            display: flex;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(102, 126, 234, 0.05);
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .intro-section:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        .intro-section-icon {
+            font-size: 24px;
+            min-width: 30px;
+        }
+
+        .intro-section-text h3 {
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .intro-section-text p {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* STAGE 2: EXPERIMENTATION */
+        #stage2 {
+            gap: 15px;
+        }
+
+        .experiment-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr 320px;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #667eea;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .control-value {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .slider-input {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #667eea;
+            transition: all 0.2s;
+        }
+
+        .slider-input::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .slider-input::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #667eea;
+            transition: all 0.2s;
+        }
+
+        .slider-input::-moz-range-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .select-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .select-input:hover, .select-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .run-simulation-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .run-simulation-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .run-simulation-btn:active {
+            transform: translateY(0);
+        }
+
+        .center-visualization {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .digester-display {
+            position: relative;
+            width: 280px;
+            height: 380px;
+            margin-bottom: 15px;
+        }
+
+        .real-time-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-unit {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .metrics-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .microbial-health {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .health-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #667eea;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 24px;
+            background: #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #22c55e);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .health-status {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+        }
+
+        .feedback-box {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left: 4px solid #667eea;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .feedback-box.warning {
+            border-left-color: #f59e0b;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(249, 115, 22, 0.1));
+        }
+
+        .feedback-box.success {
+            border-left-color: #22c55e;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+        }
+
+        .feedback-box.error {
+            border-left-color: #ef4444;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+        }
+
+        .trial-history {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .trial-item {
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .trial-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .trial-value {
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+
+        /* STAGE 3: ANALYSIS */
+        #stage3 {
+            gap: 15px;
+        }
+
+        .analysis-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .graph-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        .graph-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .graph-container {
+            flex: 1;
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            min-height: 150px;
+            background: linear-gradient(to top, rgba(102, 126, 234, 0.05), transparent);
+            border-radius: 8px;
+            padding: 10px;
+            position: relative;
+        }
+
+        .graph-bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: all 0.3s;
+            position: relative;
+            cursor: help;
+        }
+
+        .graph-bar:hover {
+            filter: brightness(1.2);
+        }
+
+        .graph-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .graph-bar:hover .graph-tooltip {
+            opacity: 1;
+        }
+
+        .analysis-info {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .analysis-info strong {
+            color: #667eea;
+        }
+
+        .comparison-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            overflow-y: auto;
+        }
+
+        .trial-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .trial-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            gap: 12px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 12px;
+            align-items: center;
+            border-left: 4px solid #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .trial-row:hover {
+            background: #f3f4f6;
+            border-left-color: #667eea;
+        }
+
+        .trial-row.selected {
+            background: rgba(102, 126, 234, 0.1);
+            border-left-color: #667eea;
+        }
+
+        .trial-name-label {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .trial-metrics {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .metric-mini {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            font-weight: 600;
+            color: #667eea;
+            font-size: 11px;
+        }
+
+        /* STAGE 4: CHALLENGE */
+        #stage4 {
+            gap: 15px;
+        }
+
+        .challenge-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .challenge-info {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .challenge-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .challenge-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .challenge-objectives {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .objective {
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .objective-icon {
+            font-size: 16px;
+            min-width: 20px;
+        }
+
+        .challenge-controls {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .time-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .time-btn {
+            flex: 1;
+            padding: 10px;
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .time-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .time-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .challenge-status {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 8px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-value {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: #667eea;
+        }
+
+        .challenge-complete {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(16, 185, 129, 0.1));
+            border: 2px solid #22c55e;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 700;
+            color: #16a34a;
+            font-size: 14px;
+        }
+
+        .challenge-viz {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1400px) {
+            .experiment-grid {
+                grid-template-columns: 280px 1fr 280px;
+            }
+
+            .intro-content {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .challenge-layout {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .experiment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .challenge-layout {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+
+        /* SCROLLBAR STYLING */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.6);
+        }
+
+        /* TOOLTIP */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            text-decoration: underline dotted;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 11px;
+            white-space: normal;
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stage.active {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        /* LOADING STATE */
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <h1>🧪 Anaerobic Digestion Lab</h1>
+            <div class="stage-info">
+                <div class="stage-badge" id="stageBadge">Stage 1: Introduction</div>
+                <button class="reset-btn" onclick="resetSimulation()">Reset</button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main">
+            <!-- STAGE 1: INTRODUCTION -->
+            <div class="stage active" id="stage1">
+                <div class="intro-content">
+                    <!-- LEFT: DIGESTER VISUALIZATION -->
+                    <div class="digester-viz">
+                        <h3 style="text-align: center; margin-bottom: 15px; color: #333;">Live Anaerobic Digester</h3>
+                        <div class="digester-tank">
+                            <div class="digester-content">
+                                <div class="digester-inlet">
+                                    ♻️
+                                    <div class="inlet-label">Organic Waste Input</div>
+                                </div>
+                                <div class="waste-particles" id="stage1Particles"></div>
+                                <div class="microbes" id="stage1Microbes"></div>
+                                <div class="digester-liquid" id="stage1Liquid" style="height: 40%;"></div>
+                                <div class="gas-layer" id="stage1GasLayer" style="height: 20%;"></div>
+                                <div id="stage1Bubbles"></div>
+                            </div>
+                            <div class="digester-outlet">🔚<div class="outlet-label">Digestate Output</div></div>
+                        </div>
+                        <div class="digester-info">
+                            <div class="info-badge tooltip">
+                                🌡️ Temperature
+                                <span class="tooltiptext">Microbes thrive at 35-38°C</span>
+                            </div>
+                            <div class="info-badge tooltip">
+                                ⚗️ pH Balance
+                                <span class="tooltiptext">Optimal pH range: 6.8-7.4</span>
+                            </div>
+                            <div class="info-badge tooltip">
+                                💨 Methane (CH₄)
+                                <span class="tooltiptext">Primary biogas product</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: EXPLANATION PANELS -->
+                    <div class="intro-panel">
+                        <div class="intro-section">
+                            <div class="intro-section-icon">📥</div>
+                            <div class="intro-section-text">
+                                <h3>Step 1: Waste Input</h3>
+                                <p>Organic material enters the digester. Microorganisms begin breaking down complex molecules into simpler compounds.</p>
+                            </div>
+                        </div>
+
+                        <div class="intro-section">
+                            <div class="intro-section-icon">🦠</div>
+                            <div class="intro-section-text">
+                                <h3>Step 2: Microbial Breakdown</h3>
+                                <p>Bacteria work in four stages: hydrolysis, acidogenesis, acetogenesis, and methanogenesis. Each process produces different byproducts.</p>
+                            </div>
+                        </div>
+
+                        <div class="intro-section">
+                            <div class="intro-section-icon">💨</div>
+                            <div class="intro-section-text">
+                                <h3>Step 3: Biogas Production</h3>
+                                <p>Methane (50-80%) and carbon dioxide (20-50%) form as final products. Methane is captured as renewable energy.</p>
+                            </div>
+                        </div>
+
+                        <div class="intro-section">
+                            <div class="intro-section-icon">🌱</div>
+                            <div class="intro-section-text">
+                                <h3>Step 4: Digestate Removal</h3>
+                                <p>Nutrient-rich digestate exits the system. It becomes an excellent organic fertilizer for agriculture.</p>
+                            </div>
+                        </div>
+
+                        <div class="nav-buttons">
+                            <button class="btn btn-primary" onclick="goToStage(2)">Next: Experiment →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 2: EXPERIMENTATION -->
+            <div class="stage" id="stage2">
+                <div class="experiment-grid">
+                    <!-- LEFT: CONTROLS -->
+                    <div class="control-panel">
+                        <div class="control-section">
+                            <div class="control-title">Operating Conditions</div>
+                            
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>🌡️ Temperature</span>
+                                    <span class="control-value" id="tempValue">35°C</span>
+                                </div>
+                                <input type="range" class="slider-input" id="tempSlider" min="15" max="50" value="35" oninput="updateValue('temp')">
+                                <div style="font-size: 11px; color: #999;">15°C — 50°C</div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>⚗️ pH Level</span>
+                                    <span class="control-value" id="phValue">7.0</span>
+                                </div>
+                                <input type="range" class="slider-input" id="phSlider" min="5.0" max="9.0" step="0.1" value="7.0" oninput="updateValue('ph')">
+                                <div style="font-size: 11px; color: #999;">5.0 — 9.0</div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>⏱️ Retention Time</span>
+                                    <span class="control-value" id="timeValue">20d</span>
+                                </div>
+                                <input type="range" class="slider-input" id="timeSlider" min="5" max="40" value="20" oninput="updateValue('time')">
+                                <div style="font-size: 11px; color: #999;">5 — 40 days</div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>🔀 Mixing Intensity</span>
+                                    <span class="control-value" id="mixingValue">Medium</span>
+                                </div>
+                                <input type="range" class="slider-input" id="mixingSlider" min="0" max="2" value="1" oninput="updateValue('mixing')">
+                                <div style="font-size: 11px; color: #999;">Low — High</div>
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>📥 Organic Load</span>
+                                    <span class="control-value" id="loadValue">Normal</span>
+                                </div>
+                                <input type="range" class="slider-input" id="loadSlider" min="0" max="2" value="1" oninput="updateValue('load')">
+                                <div style="font-size: 11px; color: #999;">Light — Heavy</div>
+                            </div>
+                        </div>
+
+                        <div class="control-section">
+                            <div class="control-title">Feedstock Selection</div>
+                            <select class="select-input" id="feedstockSelect" onchange="updateValue('feedstock')">
+                                <option value="food">🍽️ Food Waste</option>
+                                <option value="manure" selected>🐄 Manure</option>
+                                <option value="fats">🧈 Fats/Oils</option>
+                                <option value="yard">🌾 Yard Waste</option>
+                                <option value="wastewater">💧 Wastewater Sludge</option>
+                            </select>
+                        </div>
+
+                        <button class="run-simulation-btn" onclick="runExperiment()">▶ Run Simulation</button>
+
+                        <div class="control-section">
+                            <div class="control-title">Trial History</div>
+                            <div class="trial-history" id="trialHistory"></div>
+                        </div>
+
+                        <div class="nav-buttons" style="margin-top: auto; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="goToStage(1)">← Back</button>
+                            <button class="btn btn-primary" onclick="goToStage(3)">Next: Analyze →</button>
+                        </div>
+                    </div>
+
+                    <!-- CENTER: DIGESTER DISPLAY -->
+                    <div class="center-visualization">
+                        <div class="digester-display">
+                            <div class="digester-tank">
+                                <div class="digester-content">
+                                    <div class="waste-particles" id="stage2Particles"></div>
+                                    <div class="microbes" id="stage2Microbes"></div>
+                                    <div class="digester-liquid" id="stage2Liquid" style="height: 50%;"></div>
+                                    <div class="gas-layer" id="stage2GasLayer" style="height: 0%;"></div>
+                                    <div id="stage2Bubbles"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="real-time-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Methane Output</div>
+                                <div class="stat-value" id="methaneValue">0<span class="stat-unit">%</span></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">CO₂ Produced</div>
+                                <div class="stat-value" id="co2Value">0<span class="stat-unit">%</span></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">System Health</div>
+                                <div class="stat-value" id="healthValue">—<span class="stat-unit"></span></div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Efficiency</div>
+                                <div class="stat-value" id="efficiencyValue">0<span class="stat-unit">%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: METRICS & FEEDBACK -->
+                    <div class="metrics-panel">
+                        <div class="control-title">📊 Microbial Health</div>
+                        <div class="microbial-health">
+                            <div>
+                                <div class="control-label">Population Dynamics</div>
+                                <div class="health-bar">
+                                    <div class="health-fill" id="healthBar" style="width: 50%; background: #f59e0b;">
+                                        50%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="feedback-box" id="feedbackBox">
+                            System idle. Configure parameters and run simulation.
+                        </div>
+
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 15px;">
+                            <div class="control-title">Key Factors</div>
+                            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px; font-size: 12px;">
+                                <div>
+                                    <strong style="color: #667eea;">Temperature:</strong>
+                                    <div style="color: #666; margin-top: 2px;" id="factorTemp">Mesophilic (optimal 35-38°C)</div>
+                                </div>
+                                <div>
+                                    <strong style="color: #667eea;">pH Status:</strong>
+                                    <div style="color: #666; margin-top: 2px;" id="factorPH">Neutral (7.0)</div>
+                                </div>
+                                <div>
+                                    <strong style="color: #667eea;">Retention Time:</strong>
+                                    <div style="color: #666; margin-top: 2px;" id="factorTime">Standard (20 days)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nav-buttons" style="margin-top: auto; gap: 8px;">
+                            <button class="btn btn-secondary" style="width: 100%;" onclick="goToStage(1)">← Back</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 3: ANALYSIS -->
+            <div class="stage" id="stage3">
+                <div class="analysis-layout">
+                    <!-- LEFT: GRAPHS -->
+                    <div>
+                        <div class="graph-panel">
+                            <div class="graph-title">📈 Methane Production Over Trials</div>
+                            <div class="graph-container" id="methaneGraph"></div>
+                            <div class="analysis-info">
+                                <strong>What's happening?</strong> Methane production depends on temperature, pH, feedstock quality, and retention time. Optimal conditions maximize microbial efficiency.
+                            </div>
+                        </div>
+
+                        <div class="graph-panel" style="margin-top: 15px;">
+                            <div class="graph-title">⚖️ pH Stability Across Trials</div>
+                            <div class="graph-container" id="phGraph"></div>
+                            <div class="analysis-info">
+                                <strong>Why it matters:</strong> Extreme pH swings kill methanogens. Stable pH (6.8-7.4) ensures consistent biogas production.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: COMPARISON -->
+                    <div class="comparison-panel">
+                        <div class="graph-title">🔍 Trial Comparison</div>
+                        <div class="trial-comparison" id="trialComparison">
+                            <div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">
+                                Run experiments to compare results
+                            </div>
+                        </div>
+
+                        <div style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: auto;">
+                            <div class="graph-title" style="margin-bottom: 10px;">💡 Key Insights</div>
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; line-height: 1.6;">
+                                <div style="color: #666;" id="insight1">✓ Temperature heavily influences gas production</div>
+                                <div style="color: #666;" id="insight2">✓ pH extremes stress microbial populations</div>
+                                <div style="color: #666;" id="insight3">✓ Different feedstocks yield different biogas ratios</div>
+                                <div style="color: #666;" id="insight4">✓ Retention time balances efficiency and cost</div>
+                            </div>
+                        </div>
+
+                        <div class="nav-buttons" style="margin-top: 15px; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="goToStage(2)">← Experiment</button>
+                            <button class="btn btn-primary" onclick="goToStage(4)">Challenge →</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STAGE 4: CHALLENGE -->
+            <div class="stage" id="stage4">
+                <div class="challenge-layout">
+                    <!-- LEFT: CHALLENGE INFO -->
+                    <div class="challenge-info">
+                        <div class="challenge-title" id="challengeTitle">Challenge: Maximize Methane</div>
+                        <div class="challenge-description" id="challengeDesc">
+                            Your goal is to optimize the digester to produce maximum methane while maintaining system stability for 10 simulated days.
+                        </div>
+
+                        <div>
+                            <div class="graph-title" style="margin-bottom: 10px;">🎯 Objectives</div>
+                            <div class="challenge-objectives" id="challengeObjectives">
+                                <div class="objective">
+                                    <div class="objective-icon">✓</div>
+                                    <div>Achieve methane production above target</div>
+                                </div>
+                                <div class="objective">
+                                    <div class="objective-icon">✓</div>
+                                    <div>Maintain system pH within safe range</div>
+                                </div>
+                                <div class="objective">
+                                    <div class="objective-icon">✓</div>
+                                    <div>Keep microbial health above 70%</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="nav-buttons" style="margin-top: auto; gap: 8px;">
+                            <button class="btn btn-secondary" onclick="goToStage(3)">← Analysis</button>
+                            <button class="btn btn-primary" onclick="changeChallenge()">Try Another</button>
+                        </div>
+                    </div>
+
+                    <!-- CENTER: CONTROLS & STATUS -->
+                    <div class="challenge-controls">
+                        <div class="control-title">⚙️ Configure & Run</div>
+                        
+                        <div class="control-section">
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>🌡️ Temperature</span>
+                                    <span class="control-value" id="challengeTempValue">35°C</span>
+                                </div>
+                                <input type="range" class="slider-input" id="challengeTempSlider" min="15" max="50" value="35" oninput="updateChallenge('temp')">
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>⚗️ pH Level</span>
+                                    <span class="control-value" id="challengePhValue">7.0</span>
+                                </div>
+                                <input type="range" class="slider-input" id="challengePhSlider" min="5.0" max="9.0" step="0.1" value="7.0" oninput="updateChallenge('ph')">
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>📥 Organic Load</span>
+                                    <span class="control-value" id="challengeLoadValue">Normal</span>
+                                </div>
+                                <input type="range" class="slider-input" id="challengeLoadSlider" min="0" max="2" value="1" oninput="updateChallenge('load')">
+                            </div>
+
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>🔀 Mixing</span>
+                                    <span class="control-value" id="challengeMixingValue">Medium</span>
+                                </div>
+                                <input type="range" class="slider-input" id="challengeMixingSlider" min="0" max="2" value="1" oninput="updateChallenge('mixing')">
+                            </div>
+                        </div>
+
+                        <div class="time-controls">
+                            <button class="time-btn active" onclick="simulateChallenge(1)" id="timeBtn1">1 Day</button>
+                            <button class="time-btn" onclick="simulateChallenge(5)" id="timeBtn5">5 Days</button>
+                            <button class="time-btn" onclick="simulateChallenge(10)" id="timeBtn10">10 Days</button>
+                        </div>
+
+                        <div class="challenge-status" id="challengeStatus">
+                            <div class="status-item">
+                                <span>Time Elapsed</span>
+                                <span class="status-value" id="timeElapsed">0 / 10 days</span>
+                            </div>
+                            <div class="status-item">
+                                <span>Methane Output</span>
+                                <span class="status-value" id="challengeMethane">0%</span>
+                            </div>
+                            <div class="status-item">
+                                <span>System Health</span>
+                                <span class="status-value" id="challengeHealth">0%</span>
+                            </div>
+                            <div class="status-item">
+                                <span>pH Status</span>
+                                <span class="status-value" id="challengePHStatus">7.0</span>
+                            </div>
+                        </div>
+
+                        <div class="challenge-complete" id="challengeComplete" style="display: none;">
+                            🎉 Challenge Complete! Great work!
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: VISUALIZATION -->
+                    <div class="challenge-viz">
+                        <div style="width: 100%; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <div class="digester-tank" style="width: 220px; height: 300px;">
+                                <div class="digester-content">
+                                    <div class="microbes" id="stage4Microbes"></div>
+                                    <div class="digester-liquid" id="stage4Liquid" style="height: 50%;"></div>
+                                    <div class="gas-layer" id="stage4GasLayer" style="height: 0%;"></div>
+                                    <div id="stage4Bubbles"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="width: 100%;">
+                            <div class="graph-title" style="margin-bottom: 10px; text-align: center;">Performance Over Time</div>
+                            <div class="graph-container" id="challengeGraph" style="height: 100px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SIMULATION ENGINE
+        // ============================================
+
+        const STAGES = {
+            INTRO: 1,
+            EXPERIMENT: 2,
+            ANALYSIS: 3,
+            CHALLENGE: 4
+        };
+
+        const CHALLENGES = [
+            {
+                title: "Challenge: Maximize Methane",
+                desc: "Optimize the digester to produce maximum methane while maintaining stability for 10 simulated days.",
+                objectives: [
+                    "Achieve methane production > 80%",
+                    "Maintain pH between 6.8-7.4",
+                    "Keep microbial health > 70%"
+                ],
+                targets: { methane: 80, phMin: 6.8, phMax: 7.4, health: 70 }
+            },
+            {
+                title: "Challenge: Stable Digestion",
+                desc: "Run the digester stably for 10 days without system failure. pH must stay balanced and health high.",
+                objectives: [
+                    "Complete 10 days without pH crash",
+                    "Maintain health above 60%",
+                    "Achieve at least 50% methane output"
+                ],
+                targets: { methane: 50, phMin: 6.8, phMax: 7.4, health: 60 }
+            },
+            {
+                title: "Challenge: Recovery Mode",
+                desc: "The digester has acidified (pH 5.0). Adjust parameters carefully to recover system health over 10 days.",
+                objectives: [
+                    "Raise pH back to 7.0+",
+                    "Restore methane production to 60%+",
+                    "Rebuild microbial health to 70%+"
+                ],
+                targets: { methane: 60, phMin: 7.0, phMax: 7.4, health: 70 },
+                startState: { ph: 5.0, health: 30 }
+            },
+            {
+                title: "Challenge: Optimize Feed Mix",
+                desc: "Choose the best feedstock and operating conditions to balance efficiency and stability over 10 days.",
+                objectives: [
+                    "Experiment with different feedstocks",
+                    "Achieve > 75% methane output",
+                    "Maintain stable operating conditions"
+                ],
+                targets: { methane: 75, phMin: 6.8, phMax: 7.4, health: 70 }
+            }
+        ];
+
+        let currentStage = STAGES.INTRO;
+        let currentChallenge = 0;
+        let simulationData = {
+            trials: [],
+            currentTrial: null,
+            graphs: {
+                methane: [],
+                ph: [],
+                health: []
+            }
+        };
+
+        let challengeData = {
+            timeElapsed: 0,
+            methaneHistory: [],
+            phHistory: [],
+            healthHistory: []
+        };
+
+        // ============================================
+        // STAGE NAVIGATION
+        // ============================================
+
+        function goToStage(stageNum) {
+            currentStage = stageNum;
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.getElementById('stage' + stageNum).classList.add('active');
+
+            const stageTitles = {
+                1: "Stage 1: Introduction",
+                2: "Stage 2: Experimentation",
+                3: "Stage 3: Analysis",
+                4: "Stage 4: Challenge"
+            };
+            document.getElementById('stageBadge').textContent = stageTitles[stageNum];
+
+            if (stageNum === 1) {
+                startIntroAnimation();
+            } else if (stageNum === 2) {
+                initializeExperiment();
+            } else if (stageNum === 3) {
+                renderGraphs();
+            } else if (stageNum === 4) {
+                initializeChallenge();
+            }
+        }
+
+        function resetSimulation() {
+            if (confirm('Reset the simulation? All data will be lost.')) {
+                simulationData = {
+                    trials: [],
+                    currentTrial: null,
+                    graphs: {
+                        methane: [],
+                        ph: [],
+                        health: []
+                    }
+                };
+                challengeData = {
+                    timeElapsed: 0,
+                    methaneHistory: [],
+                    phHistory: [],
+                    healthHistory: []
+                };
+                goToStage(STAGES.INTRO);
+            }
+        }
+
+        // ============================================
+        // STAGE 1: INTRODUCTION ANIMATIONS
+        // ============================================
+
+        function startIntroAnimation() {
+            createParticles('stage1');
+            createMicrobes('stage1');
+            createBubbles('stage1');
+            animateLiquid('stage1');
+        }
+
+        function createParticles(stage) {
+            const container = document.getElementById(stage + 'Particles');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 4; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 260 + 'px';
+                particle.style.animationDelay = i * 0.6 + 's';
+                particle.style.animationDuration = (2 + Math.random() * 2) + 's';
+                container.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (container.children.length > 0) {
+                        createParticles(stage);
+                    }
+                }, 2000 + i * 600);
+            }
+        }
+
+        function createMicrobes(stage) {
+            const container = document.getElementById(stage + 'Microbes');
+            container.innerHTML = '';
+            
+            const health = stage === 'stage1' ? 0.7 : (stage === 'stage2' ? simulationData.currentTrial?.microbialHealth || 0 : 0);
+            const color = health > 0.7 ? '#22c55e' : health > 0.4 ? '#f59e0b' : '#ef4444';
+            const count = Math.floor(30 * (health || 0.5));
+            
+            for (let i = 0; i < count; i++) {
+                const microbe = document.createElement('div');
+                microbe.className = 'microbe';
+                microbe.style.background = color;
+                microbe.style.width = (3 + Math.random() * 3) + 'px';
+                microbe.style.height = microbe.style.width;
+                microbe.style.left = Math.random() * 260 + 'px';
+                microbe.style.top = Math.random() * 320 + 'px';
+                microbe.style.animationDelay = Math.random() * 4 + 's';
+                microbe.style.animationDuration = (3 + Math.random() * 3) + 's';
+                container.appendChild(microbe);
+            }
+        }
+
+        function createBubbles(stage, intensity = 0.5) {
+            const container = document.getElementById(stage + 'Bubbles');
+            
+            const count = Math.floor(intensity * 8);
+            for (let i = 0; i < count; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = 6 + Math.random() * 8;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 260 + 'px';
+                bubble.style.bottom = '-' + size + 'px';
+                bubble.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(bubble);
+                
+                setTimeout(() => bubble.remove(), 2100);
+            }
+            
+            if (intensity > 0) {
+                setTimeout(() => createBubbles(stage, intensity), 1000);
+            }
+        }
+
+        function animateLiquid(stage) {
+            const liquid = document.getElementById(stage + 'Liquid');
+            if (liquid) {
+                let height = 40;
+                setInterval(() => {
+                    height = 35 + Math.random() * 15;
+                    liquid.style.height = height + '%';
+                }, 2000);
+            }
+        }
+
+        // ============================================
+        // STAGE 2: EXPERIMENTATION
+        // ============================================
+
+        function initializeExperiment() {
+            createParticles('stage2');
+            createMicrobes('stage2');
+            animateLiquid('stage2');
+        }
+
+        function updateValue(type) {
+            const temp = parseInt(document.getElementById('tempSlider').value);
+            const ph = parseFloat(document.getElementById('phSlider').value);
+            const time = parseInt(document.getElementById('timeSlider').value);
+            const mixing = parseInt(document.getElementById('mixingSlider').value);
+            const load = parseInt(document.getElementById('loadSlider').value);
+            const feedstock = document.getElementById('feedstockSelect').value;
+
+            document.getElementById('tempValue').textContent = temp + '°C';
+            document.getElementById('phValue').textContent = ph.toFixed(1);
+            document.getElementById('timeValue').textContent = time + 'd';
+            
+            const mixingText = ['Low', 'Medium', 'High'];
+            document.getElementById('mixingValue').textContent = mixingText[mixing];
+            
+            const loadText = ['Light', 'Normal', 'Heavy'];
+            document.getElementById('loadValue').textContent = loadText[load];
+        }
+
+        function runExperiment() {
+            const temp = parseInt(document.getElementById('tempSlider').value);
+            const ph = parseFloat(document.getElementById('phSlider').value);
+            const time = parseInt(document.getElementById('timeSlider').value);
+            const mixing = parseInt(document.getElementById('mixingSlider').value);
+            const load = parseInt(document.getElementById('loadSlider').value);
+            const feedstock = document.getElementById('feedstockSelect').value;
+
+            // Calculate performance
+            const trial = calculatePerformance(temp, ph, time, mixing, load, feedstock);
+            simulationData.trials.push(trial);
+            simulationData.currentTrial = trial;
+
+            // Update graphs
+            simulationData.graphs.methane.push(trial.methane);
+            simulationData.graphs.ph.push(ph);
+            simulationData.graphs.health.push(trial.microbialHealth * 100);
+
+            // Animate digester
+            updateDigesterDisplay('stage2', trial);
+
+            // Update metrics
+            updateMetrics(trial);
+
+            // Add to trial history
+            addTrialToHistory(trial);
+
+            // Update factors explanation
+            updateFactorExplanations(temp, ph, time, mixing, load, feedstock);
+        }
+
+        function calculatePerformance(temp, ph, time, mixing, load, feedstock) {
+            // Temperature factor (optimal around 35-38°C)
+            const tempOptimal = 36;
+            const tempFactor = Math.exp(-Math.pow(temp - tempOptimal, 2) / 80);
+
+            // pH factor (optimal 6.8-7.4)
+            const phOptimal = 7.1;
+            const phFactor = Math.exp(-Math.pow(ph - phOptimal, 2) / 0.5);
+
+            // Time factor (productivity increases with retention time up to a point)
+            const timeFactor = Math.min(1, time / 25);
+
+            // Mixing factor (medium mixing is best)
+            const mixingOptimal = 1;
+            const mixingFactor = Math.exp(-Math.pow(mixing - mixingOptimal, 2) / 1.5);
+
+            // Load factor (too much or too little is bad)
+            const loadOptimal = 1;
+            const loadFactor = Math.exp(-Math.pow(load - loadOptimal, 2) / 1.2);
+
+            // Feedstock factors (methane yield)
+            const feedstockYield = {
+                food: 1.2,
+                manure: 1.0,
+                fats: 1.4,
+                yard: 0.8,
+                wastewater: 0.9
+            };
+
+            const methane = Math.min(100, 
+                tempFactor * phFactor * timeFactor * mixingFactor * loadFactor * (feedstockYield[feedstock] || 1.0) * 85
+            );
+
+            // Microbial health (inversely affected by pH swings)
+            const phDeviation = Math.abs(ph - 7.0);
+            const microbialHealth = Math.max(0, Math.min(1, 
+                (tempFactor * 0.7 + phFactor * 0.3) * (1 - phDeviation * 0.05)
+            ));
+
+            // CO2 as complement to methane
+            const co2 = Math.min(100, 100 - methane + Math.random() * 20);
+
+            // Efficiency (combined metric)
+            const efficiency = (methane * 0.6 + 100 * microbialHealth * 0.4);
+
+            return {
+                temp, ph, time, mixing, load, feedstock,
+                methane: Math.round(methane),
+                co2: Math.round(co2),
+                microbialHealth: microbialHealth,
+                efficiency: Math.round(efficiency),
+                timestamp: new Date()
+            };
+        }
+
+        function updateDigesterDisplay(stage, trial) {
+            const gasLayer = document.getElementById(stage + 'GasLayer');
+            const liquid = document.getElementById(stage + 'Liquid');
+            const bubbles = document.getElementById(stage + 'Bubbles');
+
+            gasLayer.style.height = trial.methane + '%';
+            createBubbles(stage, trial.methane / 100);
+            createMicrobes(stage);
+
+            document.getElementById('methaneValue').textContent = trial.methane + '%';
+            document.getElementById('co2Value').textContent = trial.co2 + '%';
+            document.getElementById('healthValue').textContent = Math.round(trial.microbialHealth * 100) + '%';
+            document.getElementById('efficiencyValue').textContent = trial.efficiency + '%';
+
+            updateHealthBar(trial.microbialHealth);
+        }
+
+        function updateMetrics(trial) {
+            const health = trial.microbialHealth;
+            let status = '';
+            let feedbackClass = '';
+
+            if (trial.methane < 30) {
+                status = '⚠️ Low activity detected. Microbes under stress.';
+                feedbackClass = 'warning';
+            } else if (trial.methane < 60) {
+                status = '✓ Acceptable performance. System operating normally.';
+                feedbackClass = 'warning';
+            } else if (trial.methane < 80) {
+                status = '✓✓ Good performance. Efficient biogas production.';
+                feedbackClass = 'success';
+            } else {
+                status = '✓✓✓ Excellent! Optimal methane generation achieved.';
+                feedbackClass = 'success';
+            }
+
+            const fb = document.getElementById('feedbackBox');
+            fb.textContent = status;
+            fb.className = 'feedback-box ' + feedbackClass;
+        }
+
+        function updateHealthBar(health) {
+            const bar = document.getElementById('healthBar');
+            const percent = Math.round(health * 100);
+            bar.style.width = percent + '%';
+            bar.textContent = percent + '%';
+
+            if (percent > 70) {
+                bar.style.background = 'linear-gradient(to right, #10b981, #22c55e)';
+            } else if (percent > 40) {
+                bar.style.background = 'linear-gradient(to right, #f59e0b, #fbbf24)';
+            } else {
+                bar.style.background = 'linear-gradient(to right, #ef4444, #f87171)';
+            }
+        }
+
+        function addTrialToHistory(trial) {
+            const history = document.getElementById('trialHistory');
+            const item = document.createElement('div');
+            item.className = 'trial-item';
+            item.innerHTML = `
+                <span class="trial-name">Trial ${simulationData.trials.length}</span>
+                <span class="trial-value">${trial.methane}% CH₄</span>
+            `;
+            history.insertBefore(item, history.firstChild);
+            
+            if (history.children.length > 10) {
+                history.lastChild.remove();
+            }
+        }
+
+        function updateFactorExplanations(temp, ph, time, mixing, load, feedstock) {
+            const tempStatus = temp >= 34 && temp <= 38 ? '✓ Optimal mesophilic' : temp < 34 ? '❌ Too cold' : '❌ Too warm';
+            document.getElementById('factorTemp').textContent = tempStatus + ' (' + temp + '°C)';
+
+            const phStatus = ph >= 6.8 && ph <= 7.4 ? '✓ Optimal neutral' : ph < 6.5 ? '❌ Too acidic' : ph > 7.8 ? '❌ Too alkaline' : '⚠️ Slightly off';
+            document.getElementById('factorPH').textContent = phStatus + ' (pH ' + ph.toFixed(1) + ')';
+
+            const timeStatus = time >= 15 && time <= 30 ? '✓ Ideal range' : time < 15 ? '⚠️ Short retention' : '⚠️ Long retention';
+            document.getElementById('factorTime').textContent = timeStatus + ' (' + time + ' days)';
+        }
+
+        // ============================================
+        // STAGE 3: ANALYSIS
+        // ============================================
+
+        function renderGraphs() {
+            renderGraph('methaneGraph', simulationData.graphs.methane, 'Methane %', '#667eea');
+            renderGraph('phGraph', simulationData.graphs.ph, 'pH', '#764ba2');
+            renderTrialComparison();
+        }
+
+        function renderGraph(containerId, data, label, color) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            if (data.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 40px;">Run experiments to generate data</div>';
+                return;
+            }
+
+            const maxValue = label === 'pH' ? 9 : 100;
+            const height = container.clientHeight - 20;
+
+            data.forEach((value, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'graph-bar';
+                const barHeight = (value / maxValue) * height;
+                bar.style.height = barHeight + 'px';
+                bar.style.background = color;
+                bar.innerHTML = `<span class="graph-tooltip">${value.toFixed(1)} ${label === 'pH' ? '' : '%'}</span>`;
+                container.appendChild(bar);
+            });
+        }
+
+        function renderTrialComparison() {
+            const container = document.getElementById('trialComparison');
+            
+            if (simulationData.trials.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: #999; padding: 20px; font-size: 13px;">Run experiments to compare results</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            simulationData.trials.slice(-5).reverse().forEach((trial, idx) => {
+                const row = document.createElement('div');
+                row.className = 'trial-row';
+                row.innerHTML = `
+                    <div class="trial-name-label">Trial ${simulationData.trials.length - idx}</div>
+                    <div class="trial-metrics">
+                        <span class="metric-mini">CH₄: ${trial.methane}%</span>
+                        <span class="metric-mini">pH: ${trial.ph.toFixed(1)}</span>
+                        <span class="metric-mini">H: ${Math.round(trial.microbialHealth * 100)}%</span>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // ============================================
+        // STAGE 4: CHALLENGE MODE
+        // ============================================
+
+        let currentChallengeNumber = 0;
+
+        function initializeChallenge() {
+            currentChallengeNumber = 0;
+            loadChallenge(0);
+        }
+
+        function loadChallenge(idx) {
+            currentChallengeNumber = idx;
+            const challenge = CHALLENGES[idx];
+            
+            document.getElementById('challengeTitle').textContent = challenge.title;
+            document.getElementById('challengeDesc').textContent = challenge.desc;
+            
+            const objectivesHtml = challenge.objectives.map(obj => `
+                <div class="objective">
+                    <div class="objective-icon">✓</div>
+                    <div>${obj}</div>
+                </div>
+            `).join('');
+            document.getElementById('challengeObjectives').innerHTML = objectivesHtml;
+
+            // Reset challenge data
+            challengeData = {
+                timeElapsed: 0,
+                methaneHistory: [],
+                phHistory: [],
+                healthHistory: [],
+                initialState: challenge.startState || {}
+            };
+
+            // Reset controls
+            if (challenge.startState?.ph) {
+                document.getElementById('challengePhSlider').value = challenge.startState.ph;
+                document.getElementById('challengePhValue').textContent = challenge.startState.ph.toFixed(1);
+            }
+
+            document.getElementById('challengeComplete').style.display = 'none';
+            updateChallengeBubbles();
+        }
+
+        function changeChallenge() {
+            currentChallengeNumber = (currentChallengeNumber + 1) % CHALLENGES.length;
+            loadChallenge(currentChallengeNumber);
+        }
+
+        function updateChallenge(type) {
+            const temp = parseInt(document.getElementById('challengeTempSlider').value);
+            const ph = parseFloat(document.getElementById('challengePhSlider').value);
+            const load = parseInt(document.getElementById('challengeLoadSlider').value);
+            const mixing = parseInt(document.getElementById('challengeMixingSlider').value);
+
+            document.getElementById('challengeTempValue').textContent = temp + '°C';
+            document.getElementById('challengePhValue').textContent = ph.toFixed(1);
+            
+            const loadText = ['Light', 'Normal', 'Heavy'];
+            document.getElementById('challengeLoadValue').textContent = loadText[load];
+            
+            const mixingText = ['Low', 'Medium', 'High'];
+            document.getElementById('challengeMixingValue').textContent = mixingText[mixing];
+        }
+
+        function simulateChallenge(days) {
+            const temp = parseInt(document.getElementById('challengeTempSlider').value);
+            const ph = parseFloat(document.getElementById('challengePhSlider').value);
+            const load = parseInt(document.getElementById('challengeLoadSlider').value);
+            const mixing = parseInt(document.getElementById('challengeMixingSlider').value);
+
+            for (let d = 0; d < days; d++) {
+                // Calculate for this day
+                const tempFactor = Math.exp(-Math.pow(temp - 36, 2) / 80);
+                const phFactor = Math.exp(-Math.pow(ph - 7.1, 2) / 0.5);
+                const mixingFactor = Math.exp(-Math.pow(mixing - 1, 2) / 1.5);
+                const loadFactor = Math.exp(-Math.pow(load - 1, 2) / 1.2);
+
+                let methane = tempFactor * phFactor * mixingFactor * loadFactor * 85;
+                
+                // pH drift (acidification if overloaded, alkalization if underloaded)
+                let phDrift = (load - 1) * 0.02; // Light = negative drift, Heavy = positive drift
+                phDrift -= (temp - 36) * 0.001; // Temperature also affects pH
+                
+                const newPh = Math.max(5, Math.min(9, ph + phDrift));
+                document.getElementById('challengePhSlider').value = newPh.toFixed(1);
+                document.getElementById('challengePhValue').textContent = newPh.toFixed(1);
+
+                // Health recovery from recovery challenges
+                let health = tempFactor * phFactor * 100;
+                if (challengeData.initialState?.health) {
+                    health = Math.min(100, challengeData.initialState.health + (currentChallengeNumber === 2 ? 8 * days : 0));
+                }
+
+                challengeData.methaneHistory.push(Math.round(methane));
+                challengeData.phHistory.push(parseFloat(newPh.toFixed(1)));
+                challengeData.healthHistory.push(Math.round(health));
+            }
+
+            challengeData.timeElapsed = Math.min(10, challengeData.timeElapsed + days);
+
+            // Update display
+            document.getElementById('timeElapsed').textContent = challengeData.timeElapsed + ' / 10 days';
+            if (challengeData.methaneHistory.length > 0) {
+                document.getElementById('challengeMethane').textContent = challengeData.methaneHistory[challengeData.methaneHistory.length - 1] + '%';
+            }
+            if (challengeData.healthHistory.length > 0) {
+                document.getElementById('challengeHealth').textContent = challengeData.healthHistory[challengeData.healthHistory.length - 1] + '%';
+            }
+            if (challengeData.phHistory.length > 0) {
+                document.getElementById('challengePHStatus').textContent = challengeData.phHistory[challengeData.phHistory.length - 1].toFixed(1);
+            }
+
+            // Render graph
+            renderGraph('challengeGraph', challengeData.methaneHistory, 'Methane %', '#667eea');
+
+            // Update digester
+            const lastMethane = challengeData.methaneHistory[challengeData.methaneHistory.length - 1] || 0;
+            document.getElementById('stage4GasLayer').style.height = lastMethane + '%';
+            createBubbles('stage4', lastMethane / 100);
+            createMicrobes('stage4');
+
+            // Check if challenge complete
+            if (challengeData.timeElapsed >= 10) {
+                checkChallengeCompletion();
+            }
+
+            updateChallengeBubbles();
+        }
+
+        function checkChallengeCompletion() {
+            const challenge = CHALLENGES[currentChallengeNumber];
+            const lastMethane = challengeData.methaneHistory[challengeData.methaneHistory.length - 1] || 0;
+            const lastPh = challengeData.phHistory[challengeData.phHistory.length - 1] || 7;
+            const lastHealth = challengeData.healthHistory[challengeData.healthHistory.length - 1] || 0;
+
+            const succeeded = 
+                lastMethane >= challenge.targets.methane &&
+                lastPh >= challenge.targets.phMin && lastPh <= challenge.targets.phMax &&
+                lastHealth >= challenge.targets.health;
+
+            if (succeeded) {
+                document.getElementById('challengeComplete').style.display = 'block';
+                document.getElementById('challengeComplete').textContent = '🎉 Challenge Complete! Excellent work!';
+            }
+        }
+
+        function updateChallengeBubbles() {
+            const lastMethane = challengeData.methaneHistory[challengeData.methaneHistory.length - 1] || 0;
+            if (lastMethane > 0) {
+                createBubbles('stage4', lastMethane / 100);
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        window.addEventListener('load', () => {
+            startIntroAnimation();
+        });
+
+        // Set initial values
+        updateValue();
+    </script>
+</body>
+</html>
